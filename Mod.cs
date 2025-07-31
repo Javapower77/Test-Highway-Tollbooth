@@ -72,10 +72,10 @@ namespace Test_Highway_Tollbooth
                 
                 
                 // Register other systems
-                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAfter<TollRoadPrefabUpdateSystem>(SystemUpdatePhase.PrefabUpdate);
+                updateSystem.UpdateAt<TollBoothSpawnSystem>(SystemUpdatePhase.GameSimulation);
                 updateSystem.UpdateAt<TollboothSelectionSystem>(SystemUpdatePhase.GameSimulation);
-                updateSystem.UpdateAt<ToolboothInfoUISystem>(SystemUpdatePhase.UIUpdate);
+                updateSystem.UpdateAt<TollBoothInfoUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<MousePositionUISystem>(SystemUpdatePhase.UIUpdate);
                 updateSystem.UpdateAt<TollBoothTooltipUISystem>(SystemUpdatePhase.UITooltip);
 

@@ -26,7 +26,8 @@ namespace Domain.Components
             // Set a default name that will be overridden by the spawn system
             var tollBoothData = new TollBoothPrefabData
             {
-                name = new FixedString64Bytes("TollBooth") // Default name
+                name = new FixedString64Bytes("TollBooth"), // Default name
+                BelongsToHighwayTollbooth = Entity.Null // Default to null, will be set by the spawn system
             };
 
             if (entityManager.HasComponent<TollBoothPrefabData>(entity))

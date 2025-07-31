@@ -66,6 +66,11 @@ namespace Test_Highway_Tollbooth.Systems
                 return;
             }
 
+            // Also set the entity's custom name through the NameSystem
+            var nameSystem = World.GetOrCreateSystemManaged<Game.UI.NameSystem>();
+            nameSystem.TryGetCustomName(entity, out string tollBoothNameSystem);
+
+
             var mousePosition = InputManager.instance.mousePosition;
 
             // Calculate positioning similar to vanilla tooltips
@@ -93,11 +98,11 @@ namespace Test_Highway_Tollbooth.Systems
                 screenHeight - mousePosition.y + offsetY
             );
 
-            m_TollBoothTooltipGroup.path = $"tollBoothsTooltips_{tollBoothData.name}";
+            m_TollBoothTooltipGroup.path = $"tollBoothsTooltips_{tollBoothNameSystem}";
             StringTooltip nameTollbooth = new()
             {
                 icon = "coui://javapower-test-toll-highways/Tollbooth.png",
-                value = $"{tollBoothData.name}",
+                value = $"{tollBoothNameSystem}",
             };            
             m_TollBoothTooltipGroup.children.Add(nameTollbooth);
 

@@ -9,15 +9,19 @@ namespace Domain.Components
     public struct TollBoothPrefabData : IComponentData, ISerializable
     {
         public FixedString64Bytes name;
+        public Entity BelongsToHighwayTollbooth;
+
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             reader.Read(out string name);
             this.name = new FixedString64Bytes(name);
+            reader.Read(out Entity tollboothEntity);
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(name.ToString());
+            writer.Write(BelongsToHighwayTollbooth);    
         }
     }
 

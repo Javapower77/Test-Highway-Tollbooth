@@ -1,13 +1,15 @@
+using Colossal.Entities;
 using Domain.Components;
 using Game;
 using Game.Common;
 using Game.Objects;
 using Game.Prefabs;
+using Game.UI;
 using System;
 using System.Collections.Generic;
+using Test_Highway_Tollbooth.Utilities;
 using Unity.Collections;
 using Unity.Entities;
-using Test_Highway_Tollbooth.Utilities;
 
 namespace Test_Highway_Tollbooth.Systems
 {
@@ -95,6 +97,9 @@ namespace Test_Highway_Tollbooth.Systems
                         tollBoothData.name.ToString() == "TollBooth" ||
                         tollBoothData.name.ToString() == "")
                     {
+                        // Write owner entity information after assigning the name
+                        WriteOwnerEntityInfo(entity, tollBoothData);
+
                         // Generate a unique random name
                         AssignRandomName(entity, tollBoothData);
                     }
@@ -179,6 +184,25 @@ namespace Test_Highway_Tollbooth.Systems
             return baseName;
         }
 
+        private void WriteOwnerEntityInfo(Entity tollBoothEntity, TollBoothPrefabData tollBoothData)
+        {
+            if (EntityManager.TryGetComponent<Owner>(tollBoothEntity, out var ownerComponent))
+            {
+                // Log the owner entity information
+                LogUtil.Info($"TollBoothSpawnSystem: Toll booth {tollBoothEntity.Index} belongs to owner {ownerComponent.m_Owner.Index}");
+
+                // Optionally, you can also set this information in the tollBoothData if needed
+                tollBoothData.BelongsToHighwayTollbooth = ownerComponent.m_Owner;
+
+                // Update the component data
+                EntityManager.SetComponentData(tollBoothEntity, tollBoothData);
+            }
+            else
+            {
+                LogUtil.Warn($"TollBoothSpawnSystem: Toll booth {tollBoothEntity.Index} does not have an Owner component.");
+            }
+        }
+
         // Modify the existing method where names are assigned
         private void AssignRandomName(Entity entity, TollBoothPrefabData tollBoothData)
         {
@@ -187,6 +211,10 @@ namespace Test_Highway_Tollbooth.Systems
 
             // Update the component on the entity
             EntityManager.SetComponentData(entity, tollBoothData);
+
+            // Also set the entity's custom name through the NameSystem
+            var nameSystem = World.GetOrCreateSystemManaged<Game.UI.NameSystem>();
+            nameSystem.SetCustomName(entity, randomName);
 
             // Mark this entity as processed
             m_ProcessedEntities.Add(entity);

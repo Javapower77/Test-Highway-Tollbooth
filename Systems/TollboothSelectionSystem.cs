@@ -79,7 +79,15 @@ namespace Test_Highway_Tollbooth.Systems
             var mousePosition = InputManager.instance.mousePosition;
             var ray = camera.ScreenPointToRay(new Vector3(mousePosition.x, mousePosition.y, 0));
 
-            var tollBoothEntities = m_TollBoothQuery.ToEntityArray(Allocator.TempJob);
+            // Create a separate query for instance entities that have both TollBoothPrefabData and Transform
+            // These are the actual placed tollbooth instances in the world
+            var instanceQuery = GetEntityQuery(
+                ComponentType.ReadOnly<TollBoothPrefabData>(),
+                ComponentType.ReadOnly<Game.Objects.Transform>(),
+                ComponentType.Exclude<Deleted>()
+            );
+
+            var tollBoothEntities = instanceQuery.ToEntityArray(Allocator.TempJob);
             Entity selectedTollbooth = Entity.Null;
             float closestDistance = float.MaxValue;
 
@@ -87,6 +95,16 @@ namespace Test_Highway_Tollbooth.Systems
             {
                 foreach (var entity in tollBoothEntities)
                 {
+                    // Verify this is an instance entity, not a prefab
+                    if (!EntityManager.HasComponent<PrefabRef>(entity))
+                        continue;
+
+                    var prefabRef = EntityManager.GetComponentData<PrefabRef>(entity);
+                    
+                    // Check if the prefab reference has TollBoothPrefabData
+                    if (!EntityManager.HasComponent<TollBoothPrefabData>(prefabRef.m_Prefab))
+                        continue;
+
                     if (EntityManager.TryGetComponent<Game.Objects.Transform>(entity, out var transform))
                     {
                         var entityPosition = transform.m_Position;
@@ -102,20 +120,26 @@ namespace Test_Highway_Tollbooth.Systems
                             if (rayDistance < 1000f)
                             {
                                 closestDistance = distanceToEntity;
-                                selectedTollbooth = entity;
+                                selectedTollbooth = entity; // This is now the instance entity
+                                break; // Found a tollbooth in the position of the mouse, no need to check further
                             }
                         }
                     }
                 }
 
-                // CRITICAL: Actively set the selection if we found a tollbooth
+                // CRITICAL: Actively set the selection if we found a tollbooth instance
                 if (selectedTollbooth != Entity.Null)
                 {
-                    LogUtil.Info($"TollboothSelectionSystem: Actively selecting tollbooth entity {selectedTollbooth.Index}");
-                    m_ToolSystem.selected = selectedTollbooth;
+                    LogUtil.Info($"TollboothSelectionSystem: Actively selecting tollbooth INSTANCE entity {selectedTollbooth.Index}");
                     
-                    // Prevent other systems from handling this click by consuming the input
-                    // Note: In Cities Skylines 2, this might require additional input handling
+                    // Verify we're selecting the instance, not the prefab
+                    if (EntityManager.HasComponent<PrefabRef>(selectedTollbooth))
+                    {
+                        var prefabRef = EntityManager.GetComponentData<PrefabRef>(selectedTollbooth);
+                        LogUtil.Info($"TollboothSelectionSystem: Instance entity {selectedTollbooth.Index} references prefab {prefabRef.m_Prefab.Index}");
+                    }
+                    
+                    m_ToolSystem.selected = selectedTollbooth;
                 }
                 else
                 {

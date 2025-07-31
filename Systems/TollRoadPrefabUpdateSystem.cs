@@ -22,7 +22,8 @@ namespace Systems
             AddTollComponentToRoad("RoadPrefab", "Highway Oneway - 1 lane (Toll 60kph)");
             AddTollComponentToRoad("RoadPrefab","Highway Oneway - 1 lane - Public Transport (Toll 60kph)");
             AddTollCabinComponentToRoad("StaticObjectPrefab", "TollBooth");
-            //EnableSelectionForSubObjectInRoadEntity("TollBooth");
+
+            LogUtil.Info("TollRoadPrefabUpdateSystem: System created and initialized");
         }
 
         protected override void OnUpdate()
