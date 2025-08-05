@@ -2,10 +2,12 @@ import { ModRegistrar } from "cs2/modding";
 import { MousePositionPanel } from "mods/mouse-position-panel";
 import { CS2VanillaUIResolver } from "mods/CS2VanillaUIResolver";
 import { TollboothSelectedInfoPanelComponent } from "mods/TollboothSelectedInfoPanel/TollBoothFields";
+import { FormatUtilsResolver, useFormatUtils } from "mods/FormatUtilsResolver";
 
 const register: ModRegistrar = (moduleRegistry) => {
 
     CS2VanillaUIResolver.setRegistry(moduleRegistry);
+    FormatUtilsResolver.setRegistry(moduleRegistry);
 
     moduleRegistry.append('Game', MousePositionPanel);  
 

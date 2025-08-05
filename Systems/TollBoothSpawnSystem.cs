@@ -92,12 +92,10 @@ namespace Test_Highway_Tollbooth.Systems
                     var entity = entities[i];
                     var tollBoothData = tollBoothDataArray[i];
 
-                    LogUtil.Info($"TollBoothSpawnSystem: Processing entity {entity.Index}, current name: '{tollBoothData.name}'");
+                    LogUtil.Info($"TollBoothSpawnSystem: Processing entity {entity.Index}");
 
-                    // Check if the name is empty or default
-                    if (string.IsNullOrEmpty(tollBoothData.name.ToString()) ||
-                        tollBoothData.name.ToString() == "TollBooth" ||
-                        tollBoothData.name.ToString() == "")
+                    // Check if there is no asociated highway tollbooth yet
+                    if (tollBoothData.BelongsToHighwayTollbooth == Entity.Null)
                     {
                         // Write owner entity information
                         WriteOwnerEntityInfo(entity, ref tollBoothData);
@@ -113,7 +111,7 @@ namespace Test_Highway_Tollbooth.Systems
                     }
                     else
                     {
-                        LogUtil.Info($"TollBoothSpawnSystem: Entity {entity.Index} already has name '{tollBoothData.name}', marking as processed");
+                        LogUtil.Info($"TollBoothSpawnSystem: Entity {entity.Index} already has a road associated, marking as processed");
                     }
                 }
             }
@@ -294,20 +292,22 @@ namespace Test_Highway_Tollbooth.Systems
             }
         }
 
+        /// <summary>
+        /// Assigns a randomly generated name to the specified toll booth entity.
+        /// </summary>
+        /// <remarks>This method generates a random name for the toll booth entity and assigns it using
+        /// the <see cref="Game.UI.NameSystem"/>. The assigned name is logged for debugging purposes.</remarks>
+        /// <param name="entity">The entity to which the random name will be assigned.</param>
+        /// <param name="tollBoothData">A reference to the toll booth data associated with the entity. This parameter is not modified by this
+        /// method.</param>
         private void AssignRandomName(Entity entity, ref TollBoothPrefabData tollBoothData)
         {
-            string randomName = GenerateRandomTollBoothName();
-            tollBoothData.name = new Unity.Collections.FixedString64Bytes(randomName);
+            // Generate a random name for the toll booth
+            string randomName = GenerateRandomTollBoothNameAdvanced();
 
-            // Update the component on the entity
-            EntityManager.SetComponentData(entity, tollBoothData);
-
-            // Also set the entity's custom name through the NameSystem
+            // Set the entity's custom name through the NameSystem
             var nameSystem = World.GetOrCreateSystemManaged<Game.UI.NameSystem>();
             nameSystem.SetCustomName(entity, randomName);
-
-            // Notify systems about the name change
-            TollBoothDataChanged?.Invoke(entity, randomName);
 
             LogUtil.Info($"TollBoothSpawnSystem: Assigned random name '{randomName}' to toll booth entity {entity.Index}");
         }
