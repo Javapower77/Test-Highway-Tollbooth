@@ -3,6 +3,7 @@ using Colossal.UI.Binding;
 using Domain.Components;
 using Game.Tools;
 using Game.UI;
+using Game.UI.InGame;
 using Test_Highway_Tollbooth.Extensions;
 using Test_Highway_Tollbooth.Utilities;
 using Unity.Entities;
@@ -13,11 +14,13 @@ namespace Test_Highway_Tollbooth.Systems
     {
         private ToolSystem m_ToolSystem;
         private ValueBindingHelper<bool> m_IsPanelVisible;
-        private ValueBindingHelper<string> m_PanelTitle;
         private ValueBindingHelper<string> m_TollAmount;
         private ValueBindingHelper<string> m_TotalIncome;
         private ValueBindingHelper<string> m_PanelIcon;
+
         protected override string group => Mod.Id;
+        
+        public new bool visible => selectedEntity != Entity.Null && EntityManager.HasComponent<TollBoothPrefabData>(selectedEntity);
 
         /// <inheritdoc/>
         public override void OnWriteProperties(IJsonWriter writer)
@@ -34,24 +37,30 @@ namespace Test_Highway_Tollbooth.Systems
         {
         }
 
-
+        
         protected override void OnCreate()
         {
             base.OnCreate();
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
-            m_InfoUISystem.AddMiddleSection(this);
 
-            m_IsPanelVisible = CreateBinding("isPanelVisible", false);
-            m_PanelTitle = CreateBinding("panelTitle", "Toll Booth");
-            m_TollAmount = CreateBinding("tollAmount", "0");
-            m_TotalIncome = CreateBinding("totalIncome", "0");
-            m_PanelIcon = CreateBinding("panelIcon", "");
+            m_IsPanelVisible = CreateBinding("m_IsPanelVisible", false);
+            m_TollAmount = CreateBinding("m_TollAmount", "$0.00");
+            m_TotalIncome = CreateBinding("m_TotalIncome", "$0.00");
+            m_PanelIcon = CreateBinding("m_PanelIcon", "");                              
+
+            m_InfoUISystem.AddMiddleSection(this);
 
             LogUtil.Info("ToolboothInfoUISystem created and bindings initialized.");
         }
 
         protected override void OnUpdate()
         {
+            base.OnUpdate();
+            if (!Enabled)
+            {
+                this.Enabled = true;
+            }
+                
             Entity selectedEntity = m_ToolSystem.selected;
 
             if (selectedEntity != Entity.Null && EntityManager.HasComponent<TollBoothPrefabData>(selectedEntity))
@@ -60,7 +69,8 @@ namespace Test_Highway_Tollbooth.Systems
                 {
                     LogUtil.Info("ToolboothInfoUISystem: Showing tollbooth panel");
                     m_IsPanelVisible.Value = true;
-                }
+                    base.visible = true;
+                 }
                 UpdatePanelData(selectedEntity);
             }
             else
@@ -69,10 +79,9 @@ namespace Test_Highway_Tollbooth.Systems
                 {
                     LogUtil.Info("ToolboothInfoUISystem: Hiding tollbooth panel");
                     m_IsPanelVisible.Value = false;
+                    base.visible = false;
                 }
-            }
-
-            base.visible = true;
+            }            
         }
 
         private void UpdatePanelData(Entity entity)
@@ -81,8 +90,7 @@ namespace Test_Highway_Tollbooth.Systems
                 return;
 
             if (EntityManager.TryGetComponent<TollBoothPrefabData>(entity, out var data))
-            {
-                m_PanelTitle.Value = data.name.ToString();
+            {                
                 m_TollAmount.Value = "$234.00";
                 m_TotalIncome.Value = "$1,234.56";
             }
