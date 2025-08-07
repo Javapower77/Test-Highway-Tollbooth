@@ -8,15 +8,37 @@ import { Button } from "cs2/ui";
 import { Entity } from "cs2/utils";
 import { FocusDisabled } from "cs2/input";
 import { CS2VanillaUIResolver } from "mods/CS2VanillaUIResolver";
-import { FormatUtilsResolver, useFormatUtils } from "mods/FormatUtilsResolver";
+import {
+    formatLargeNumber,
+    useFormattedLargeNumber,
+    makePretty,
+    makePrettyUppercase,
+    formatInteger,
+    capitalize,
+    formatFixedLengthInt
+} from '../../../game-ui-modules/format';
+import { TextInput } from "../../../game-ui-modules/text-input";
+// Updated import to use your DropdownComponents
+import {
+    useDropdownContext,
+    Dropdown,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem
+   
+
+} from "../../../game-ui-modules/DropdownComponents";
+
 import { Unit } from "cs2/l10n";
 import styles from "mods/TollboothSelectedInfoPanel/TollboothMainPanelComponent.module.scss";
+import { useState } from "react";
 
 const m_TollAmount$ = bindValue<string>(mod.id, "m_TollAmount");   
 const m_TotalIncome$ = bindValue<string>(mod.id, "m_TotalIncome");
 
-const uilJavapower =                "coui://javapower-test-toll-highways/";
-const AdministrationVehicle01Src    = uilJavapower + "CarPrefab.AdministrationVehicle01.png";
+// Your existing image imports...
+const uilJavapower = "coui://javapower-test-toll-highways/";
+const AdministrationVehicle01Src = uilJavapower + "CarPrefab.AdministrationVehicle01.png";
 const Bus01Src = uilJavapower + "CarPrefab.Bus01.png";
 const Bus02Src = uilJavapower + "CarPrefab.Bus02.png";
 const Bus03Src = uilJavapower + "CarPrefab.Bus03.png";
@@ -110,7 +132,7 @@ export const descriptionToolTipStyle = getModule("game-ui/common/tooltip/descrip
 
 export const roundButtonHighlightStyle = getModule("game-ui/common/input/button/themes/round-highlight-button.module.scss", "classes");
 
-// This is working, but it's possible a better solution is possible.
+// Tooltip component
 export function DescriptionTooltip(tooltipTitle: string | null, tooltipDescription: string | null): JSX.Element {
     return (
         <>
@@ -120,50 +142,211 @@ export function DescriptionTooltip(tooltipTitle: string | null, tooltipDescripti
     );
 }
 
+// Vehicle type definitions for dropdowns
+interface VehicleType {
+    id: string;
+    name: string;
+    toll: number;
+    icon?: string;
+}
+
+const vehicleTypes: VehicleType[] = [
+    { id: 'car', name: 'Personal Vehicle', toll: 5.0, icon: Car01Src },
+    { id: 'bus', name: 'Public Bus', toll: 15.0, icon: Bus01Src },
+    { id: 'truck', name: 'Freight Truck', toll: 25.0, icon: NA_TruckTractor01Src },
+    { id: 'emergency', name: 'Emergency Vehicle', toll: 0.0, icon: EU_Ambulance01Src },
+    { id: 'service', name: 'Service Vehicle', toll: 10.0, icon: NA_PostVan01Src },
+];
+
+const qualityOptions = [
+    { id: 'low', name: 'Low Quality', description: 'Basic toll collection' },
+    { id: 'medium', name: 'Medium Quality', description: 'Standard toll collection' },
+    { id: 'high', name: 'High Quality', description: 'Advanced toll collection' },
+    { id: 'ultra', name: 'Ultra Quality', description: 'Premium toll collection' },
+];
+
 export const TollboothMainPanelComponent = () => {
     const m_TollAmount = useValue(m_TollAmount$);
     const m_TotalIncome = useValue(m_TotalIncome$);
+    const formattedScore = useFormattedLargeNumber(1500, 2);
+    
+    // State for dropdowns
+    const [selectedQuality, setSelectedQuality] = useState('high');
+    const [selectedVehicleType, setSelectedVehicleType] = useState('car');
+    const [selectedTollRate, setSelectedTollRate] = useState(5.0);
+
     console.log("TollboothMainPanelComponent called", m_TollAmount, m_TotalIncome);
-    const formatResolver = FormatUtilsResolver.instance;
+
+    // Handle quality selection
+    const handleQualityChange = (value: string) => {
+        console.log("Quality changed to:", value);
+        setSelectedQuality(value);
+        // Trigger any backend updates here
+        trigger(mod.id, "setTollboothQuality", value);
+    };
+
+    // Handle vehicle type selection
+    const handleVehicleTypeChange = (value: string) => {
+        console.log("Vehicle type changed to:", value);
+        setSelectedVehicleType(value);
+        const vehicle = vehicleTypes.find(v => v.id === value);
+        if (vehicle) {
+            setSelectedTollRate(vehicle.toll);
+            // Trigger backend update for toll rates
+            trigger(mod.id, "setVehicleTollRate", value, vehicle.toll);
+        }
+    };
+
+    const getCurrentQualityName = () => {
+        const quality = qualityOptions.find(q => q.id === selectedQuality);
+        return quality?.name || 'Unknown';
+    };
+
+    const getCurrentVehicleName = () => {
+        const vehicle = vehicleTypes.find(v => v.id === selectedVehicleType);
+        return vehicle?.name || 'Unknown';
+    };
 
     return (
         <>
-            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true} >
+            {/* Basic Information Section */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
                 <InfoRow
                     left={"Toll Amount"}
                     right={m_TollAmount}
-                    tooltip={"Testing"}
+                    tooltip={ DescriptionTooltip("Current Toll Amount", "The toll amount for the selected vehicle type") }
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
                     className={InfoRowTheme.infoRow}
-                ></InfoRow>
+                />
                 <InfoRow
                     left={"Total Income"}
                     right={m_TotalIncome}
-                    tooltip={"Testing"}
+                    tooltip={DescriptionTooltip("Total Income", "Total revenue generated by this tollbooth")}
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
                     className={InfoRowTheme.infoRow}
-                ></InfoRow>
+                />
             </InfoSection>
-            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true} >
+
+            {/* Tollbooth Settings Section */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
                 <InfoRow
-                    left={"Current Rates:"}
-                    right={formatResolver.createRangeDisplay({
-                        min: 0,
-                        max: 100,
-                        unit: Unit.Money,
-                        separator: " to ",
-                        className: "{styles.toll-rates}"
-                    })}
-                    tooltip={"Testing"}
+                    left={"Tollbooth Quality"}
+                    right={
+                        <Dropdown
+                            selectedValue={selectedQuality}
+                            onSelectionChange={handleQualityChange}
+                            focusKey="tollbooth-quality-dropdown"
+                        >
+                            <DropdownToggle focusKey="tollbooth-quality-toggle">
+                                {getCurrentQualityName()}
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                {qualityOptions.map(option => (
+                                    <DropdownItem
+                                        key={option.id}
+                                        value={option.id}
+                                        selected={option.id === selectedQuality}
+                                        focusKey={`quality-${option.id}`}
+                                    >
+                                        <div>
+                                            <strong>{option.name}</strong>
+                                            <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
+                                                {option.description}
+                                            </div>
+                                        </div>
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                    }
+                    tooltip={DescriptionTooltip("Tollbooth Quality", "Higher quality tollbooths process vehicles faster and generate more revenue")}
+                    uppercase={true}
+                    disableFocus={true}
+                    subRow={false}
+                    className={InfoRowTheme.infoRow}
+                />
+
+                <InfoRow
+                    left={"Vehicle Type Rates"}
+                    right={
+                        <Dropdown
+                            selectedValue={selectedVehicleType}
+                            onSelectionChange={handleVehicleTypeChange}
+                            focusKey="vehicle-type-dropdown"
+                        >
+                            <DropdownToggle focusKey="vehicle-type-toggle">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {vehicleTypes.find(v => v.id === selectedVehicleType)?.icon && (
+                                        <img 
+                                            src={vehicleTypes.find(v => v.id === selectedVehicleType)?.icon} 
+                                            style={{ width: '24px', height: '24px' }}
+                                            alt=""
+                                        />
+                                    )}
+                                    <span>{getCurrentVehicleName()}</span>
+                                    <span style={{ marginLeft: 'auto', opacity: 0.8 }}>
+                                        ${selectedTollRate.toFixed(2)}
+                                    </span>
+                                </div>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                {vehicleTypes.map(vehicle => (
+                                    <DropdownItem
+                                        key={vehicle.id}
+                                        value={vehicle.id}
+                                        selected={vehicle.id === selectedVehicleType}
+                                        focusKey={`vehicle-${vehicle.id}`}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                            {vehicle.icon && (
+                                                <img 
+                                                    src={vehicle.icon} 
+                                                    style={{ width: '32px', height: '32px' }}
+                                                    alt=""
+                                                />
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <div><strong>{vehicle.name}</strong></div>
+                                                <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
+                                                    Toll: ${vehicle.toll.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </DropdownItem>
+                                ))}
+                            </DropdownMenu>
+                        </Dropdown>
+                    }
+                    tooltip={DescriptionTooltip("Vehicle Type Rates", "Configure toll rates for different vehicle types")}
+                    uppercase={true}
+                    disableFocus={true}
+                    subRow={false}
+                    className={InfoRowTheme.infoRow}
+                />
+            </InfoSection>
+
+            {/* Statistics Section */}
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <InfoRow
+                    left={"Current Stats"}
+                    right={
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div>Quality: {getCurrentQualityName()}</div>
+                            <div>Active Rate: ${selectedTollRate.toFixed(2)}</div>
+                            <div>Score: {formattedScore}</div>
+                            <div>Total Processed: {formatInteger(1234567)}</div>
+                        </div>
+                    }
+                    tooltip={DescriptionTooltip("Statistics", "Current operational statistics for this tollbooth")}
                     uppercase={false}
                     disableFocus={true}
                     subRow={false}
                     className={InfoRowTheme.infoRow}
-                ></InfoRow>
+                />
             </InfoSection>
         </>
     );
