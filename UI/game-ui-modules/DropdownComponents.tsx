@@ -161,8 +161,7 @@ export const DropdownToggle: React.FC<DropdownToggleProps> = ({
     <button
       type="button"
       className={cs(
-        'dropdown-toggle',
-        'dropdown-toggle_prl', // CSS class from the game
+        'dropdown-toggle_bN9', // 'dropdown-toggle_prl', // CSS class from the game
         { 
           'active': isOpen,
           'disabled': disabled 
@@ -176,10 +175,10 @@ export const DropdownToggle: React.FC<DropdownToggleProps> = ({
       aria-haspopup="true"
       data-focus-key={focusKey}
     >
-      <div className={cs('dropdown-label')}>
+      <div className={cs('label_REA')}>
         {children}
       </div>
-      <div className={cs('dropdown-indicator')}>
+      <div className={cs('indicator_lzV')}>
         <svg width="12" height="8" viewBox="0 0 12 8">
           <path d="M1 1l5 5 5-5" stroke="currentColor" strokeWidth="2" fill="none"/>
         </svg>
@@ -201,10 +200,10 @@ export const DropdownMenu: React.FC<{ children: ReactNode; className?: string }>
 
   return (
     <div 
-      className={cs('dropdown-popup', 'dropdown-popup_mMv', className)}
+      className={cs('dropdown-popup', 'dropdown-popup_duR', className)}
       role="menu"
     >
-      <div className={cs('dropdown-menu', 'dropdown-menu_Swd')}>
+      <div className={cs('dropdown-menu', 'dropdown-menu_rL4')}>
         {children}
       </div>
     </div>
@@ -245,7 +244,6 @@ export const DropdownItem: React.FC<DropdownItemProps> = ({
   return (
     <div
       className={cs(
-        'dropdown-item',
         'dropdown-item_t3P', // CSS class from the game
         { 'selected': isSelected },
         className

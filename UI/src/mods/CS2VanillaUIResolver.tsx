@@ -146,13 +146,6 @@ type PropsCheckbox = {
     onChange?: (checked: boolean) => void;
 };
 
-type PropsDropdown = {
-    focusKey?: FocusKey;
-    disabled?: boolean;
-    className?: string;
-    children?: ReactNode;
-    theme?: any;
-};
 
 type PropsProgressBar = {
     value?: number;
@@ -201,6 +194,48 @@ type PropsToggle = {
     className?: string;
 };
 
+// worked great after de-obfuscation
+type CapacityBarProps = {
+    progress: number;
+    max: number;
+    plain?: boolean;
+    invertColorCodes?: boolean;
+    children?: React.ReactNode;
+    className?: string;
+};
+
+type DropdownProps = {
+    children: ReactNode;
+    className?: string;
+    defaultOpen?: boolean;
+    selectedValue?: any;
+    onSelectionChange?: (value: any) => void;
+    focusKey?: string;
+};
+
+type DropdownToggleProps = {
+    theme?: any;
+    openIconComponent?: ReactNode;
+    closeIconComponent?: ReactNode;
+    buttonTheme?: any;
+    sounds?: any;
+    showHint?: boolean;
+    selectSound?: string;
+    tooltipLabel?: string;
+    className?: string;
+    children: ReactNode;
+    [key: string]: any;
+};
+
+type DropdownItemProps<T = any> = {
+    children: ReactNode;
+    className?: string;
+    value?: T;
+    selected?: boolean;
+    onClick?: (value: T) => void;
+    focusKey?: string;
+};
+
 // COMPREHENSIVE REGISTRY INDEX
 const registryIndex = {
     // Layout Components
@@ -239,8 +274,16 @@ const registryIndex = {
     TextField: ["game-ui/common/input/text-field/text-field.tsx", "TextField"],
     Checkbox: ["game-ui/common/input/toggle/checkbox.tsx", "Checkbox"],
     Toggle: ["game-ui/common/input/toggle/toggle.tsx", "Toggle"],
-    Dropdown: ["game-ui/common/input/dropdown/dropdown.tsx", "Dropdown"],
     
+    //de-ofuscated 
+    CapacityBar: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.tsx", "CapacityBar"],
+    CapacityBarTheme: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.module.scss", "classes"],
+    //de-ofuscated
+    Dropdown: ["game-ui/common/input/dropdown/dropdown.tsx", "Dropdown"],
+    DropdownToggle: ["game-ui/common/input/dropdown/dropdown-toggle.tsx", "DropdownToggle"],
+    DropdownItem: ["game-ui/common/input/dropdown/items/dropdown-item.tsx", "DropdownItem"],
+    DropdownTheme: ["game-ui/common/input/dropdown/themes/default.module.scss", "classes"],
+
     // Navigation Components
     TabContainer: ["game-ui/common/navigation/tab-container/tab-container.tsx", "TabContainer"],
     Tab: ["game-ui/common/navigation/tab/tab.tsx", "Tab"],
@@ -381,7 +424,14 @@ export class CS2VanillaUIResolver {
     public get TextField(): (props: PropsTextField) => JSX.Element { return this.cachedData["TextField"] ?? this.updateCache("TextField"); }
     public get Checkbox(): (props: PropsCheckbox) => JSX.Element { return this.cachedData["Checkbox"] ?? this.updateCache("Checkbox"); }
     public get Toggle(): (props: PropsToggle) => JSX.Element { return this.cachedData["Toggle"] ?? this.updateCache("Toggle"); }
-    public get Dropdown(): (props: PropsDropdown) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown"); }
+
+    
+    public get CapacityBar(): (props: CapacityBarProps) => JSX.Element { return this.cachedData["CapacityBar"] ?? this.updateCache("CapacityBar"); }
+    public get CapacityBarTheme(): Theme | any { return this.cachedData["CapacityBarTheme"] ?? this.updateCache("CapacityBarTheme"); }
+    public get Dropdown(): (props: DropdownProps) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown"); }
+    public get DropdownToggle(): (props: DropdownToggleProps) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle"); }
+    public get DropdownItem(): <T = any>(props: DropdownItemProps<T>) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem"); }    
+    public get DropdownTheme(): Theme | any { return this.cachedData["DropdownTheme"] ?? this.updateCache("DropdownTheme"); }   
 
     // NAVIGATION COMPONENTS
     public get TabContainer(): (props: PropsTabContainer) => JSX.Element { return this.cachedData["TabContainer"] ?? this.updateCache("TabContainer"); }
