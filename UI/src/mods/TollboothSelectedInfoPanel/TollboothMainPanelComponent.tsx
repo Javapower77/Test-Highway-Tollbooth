@@ -1,4 +1,4 @@
-import { getModule } from "cs2/modding";
+﻿import { getModule } from "cs2/modding";
 import { Theme, Color } from "cs2/bindings";
 import { bindValue, trigger, useValue } from "cs2/api";
 import { useLocalization } from "cs2/l10n";
@@ -23,6 +23,11 @@ import { TextInput } from "../../../game-ui-modules/text-input";
 import { Unit } from "cs2/l10n";
 import styles from "mods/TollboothSelectedInfoPanel/TollboothMainPanelComponent.module.scss";
 import { useState, useMemo } from "react";
+import tollboothStyles from "./TollboothDropdown.module.scss";
+//import { InfoSectionFoldout } from '../../../game-ui-modules/InfoSectionFoldoutControl';
+
+
+//import { InfoRow, TooltipRow } from '../../../game-ui-modules/InfoRowControl';
 
 const m_TollAmount$ = bindValue<string>(mod.id, "m_TollAmount");   
 const m_TotalIncome$ = bindValue<string>(mod.id, "m_TotalIncome");
@@ -89,6 +94,8 @@ const MoneySrc = uilJavapower + "Money.svg";
 const RouteTicketPriceSrc = uilJavapower + "RouteTicketPrice.svg";
 
 
+
+
 // Vehicle type definitions for dropdowns
 interface VehicleType {
     id: string;
@@ -98,32 +105,23 @@ interface VehicleType {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 export const InfoRowTheme: Theme | any = getModule(
     "game-ui/game/components/selected-info-panel/shared-components/info-row/info-row.module.scss",
     "classes"
 )
 
+
 export const InfoSection: any = getModule(
     "game-ui/game/components/selected-info-panel/shared-components/info-section/info-section.tsx",
     "InfoSection"
-)
+) 
 
+/*
 export const InfoRow: any = getModule(
     "game-ui/game/components/selected-info-panel/shared-components/info-row/info-row.tsx",
     "InfoRow"
 )
+*/
 
 export const descriptionToolTipStyle = getModule("game-ui/common/tooltip/description-tooltip/description-tooltip.module.scss", "classes");
 
@@ -138,7 +136,6 @@ export function DescriptionTooltip(tooltipTitle: string | null, tooltipDescripti
         </>
     );
 }
-
 
 export const TollboothMainPanelComponent = () => {
     const m_TollAmount = useValue(m_TollAmount$);
@@ -161,17 +158,31 @@ export const TollboothMainPanelComponent = () => {
     ];
 
     const qualityOptions = [
-        { id: 'low', name: 'Low Quality', description: 'Basic toll collection' },
-        { id: 'medium', name: 'Medium Quality', description: 'Standard toll collection' },
-        { id: 'high', name: 'High Quality', description: 'Advanced toll collection' },
-        { id: 'ultra', name: 'Ultra Quality', description: 'Premium toll collection' },
+        { id: 'low', name: 'Low Quality', description: 'Basic toll collection', efficiency: 70 },
+        { id: 'medium', name: 'Medium Quality', description: 'Standard toll collection', efficiency: 85 },
+        { id: 'high', name: 'High Quality', description: 'Advanced toll collection', efficiency: 95 },
+        { id: 'ultra', name: 'Ultra Quality', description: 'Premium toll collection', efficiency: 99 },
     ];
 
+    const timeOfDayOptions = [
+        { id: 'peak', name: 'Peak Hours', multiplier: 1.5, description: 'Higher rates during busy times' },
+        { id: 'normal', name: 'Normal Hours', multiplier: 1.0, description: 'Standard toll rates' },
+        { id: 'night', name: 'Night Hours', multiplier: 0.8, description: 'Reduced rates for night time' },
+        { id: 'weekend', name: 'Weekend', multiplier: 1.2, description: 'Weekend pricing' },
+    ];
+
+    const paymentMethods = [
+        { id: 'electronic', name: 'Electronic Only', speed: 'Fast', description: 'Automatic electronic toll collection' },
+        { id: 'cash', name: 'Cash Only', speed: 'Slow', description: 'Manual cash collection booth' },
+        { id: 'mixed', name: 'Mixed Payment', speed: 'Medium', description: 'Both electronic and cash accepted' },
+    ];
 
     // State for dropdowns
     const [selectedQuality, setSelectedQuality] = useState('high');
     const [selectedVehicleType, setSelectedVehicleType] = useState('car');
     const [selectedTollRate, setSelectedTollRate] = useState(5.0);
+    const [selectedTimeOfDay, setSelectedTimeOfDay] = useState('normal');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('mixed');
 
     // Handle quality selection
     const handleQualityChange = (value: string) => {
@@ -193,6 +204,21 @@ export const TollboothMainPanelComponent = () => {
         }
     };
 
+    // Handle time of day selection
+    const handleTimeOfDayChange = (value: string) => {
+        console.log("Time of day changed to:", value);
+        setSelectedTimeOfDay(value);
+        trigger(mod.id, "setTimeOfDayPricing", value);
+    };
+
+    // Handle payment method selection
+    const handlePaymentMethodChange = (value: string) => {
+        console.log("Payment method changed to:", value);
+        setSelectedPaymentMethod(value);
+        trigger(mod.id, "setPaymentMethod", value);
+    };
+
+    // Helper functions
     const getCurrentQualityName = () => {
         const quality = qualityOptions.find(q => q.id === selectedQuality);
         return quality?.name || 'Unknown';
@@ -203,40 +229,50 @@ export const TollboothMainPanelComponent = () => {
         return vehicle?.name || 'Unknown';
     };
 
+    const getCurrentTimeOfDayName = () => {
+        const timeOfDay = timeOfDayOptions.find(t => t.id === selectedTimeOfDay);
+        return timeOfDay?.name || 'Unknown';
+    };
+
+    const getCurrentPaymentMethodName = () => {
+        const paymentMethod = paymentMethods.find(p => p.id === selectedPaymentMethod);
+        return paymentMethod?.name || 'Unknown';
+    };
+
+
     return (
         <>
             {/* Basic Information Section */}
             <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
-                <InfoRow
+                <CS2VanillaUIResolver.instance.InfoRow
                     left={"Toll Amount"}
                     right={m_TollAmount}
-                    tooltip={ DescriptionTooltip("Current Toll Amount", "The toll amount for the selected vehicle type") }
+                    tooltip={DescriptionTooltip("Current Toll Amount", "The toll amount for the selected vehicle type")}
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
-                    className={InfoRowTheme.infoRow}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                 />
-                <InfoRow
+                <CS2VanillaUIResolver.instance.InfoRow
                     left={"Total Income"}
                     right={m_TotalIncome}
                     tooltip={DescriptionTooltip("Total Income", "Total revenue generated by this tollbooth")}
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
-                    className={InfoRowTheme.infoRow}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                 />
             </InfoSection>
 
             {/* Capacity Bars Section */}
             <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
-                {/* Daily Vehicle Target Progress */}
-                <InfoRow
-                    left={"Daily Vehicle Target"}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Capacity Bar - Deobfuscated"}
                     tooltip={DescriptionTooltip("Current Toll Amount", "The toll amount for the selected vehicle type")}
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
-                    className={InfoRowTheme.infoRow}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                 />
                 <CS2VanillaUIResolver.instance.CapacityBar
                     progress={m_VehiclesPassed}
@@ -246,54 +282,51 @@ export const TollboothMainPanelComponent = () => {
                 />
             </InfoSection>
 
-            {/* DropDown Section */}
+            {/* Example 1: Vehicle Type Selection with Icons */}
             <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
-                <InfoRow
-                    left={"Tollbooth Quality"}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"Vehicle Type Configuration"}
                     right={
                         <CS2VanillaUIResolver.instance.Dropdown
-                            selectedValue={selectedQuality}
-                            onSelectionChange={handleQualityChange}
-                            focusKey="tollbooth-quality-dropdown"
-                        >
-                            <CS2VanillaUIResolver.instance.DropdownToggle focusKey="tollbooth-quality-toggle">
-                                {getCurrentQualityName()}
-                            
-                            
-                                {qualityOptions.map(option => (
-                                    <CS2VanillaUIResolver.instance.DropdownItem
-                                        key={option.id}
-                                        value={option.id}
-                                        selected={option.id === selectedQuality}
-                                        
-                                    >
-                                        <div>
-                                            <strong>{option.name}</strong>
-                                            <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-                                                {option.description}
+                            focusKey="Dropdown De-obfuscated"
+                            onToggle={(visible) => console.log("Vehicle dropdown toggled:", visible)}
+                            className={CS2VanillaUIResolver.instance.DropdownTheme.dropdownMenu}
+                            content={
+                                <>
+                                    {vehicleTypes.map(vehicle => (
+                                        <CS2VanillaUIResolver.instance.DropdownItem
+                                            key={vehicle.id}
+                                            value={vehicle.id}
+                                            selected={vehicle.id === selectedVehicleType}
+                                            onChange={handleVehicleTypeChange}
+                                            focusKey={`vehicle-${vehicle.id}`}
+                                            className={CS2VanillaUIResolver.instance.DropdownTheme.dropdownItem}
+                                        >
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
+                                                {vehicle.icon && (
+                                                    <img
+                                                        src={vehicle.icon}
+                                                        style={{ width: '32px', height: '32px' }}
+                                                        alt=""
+                                                    />
+                                                )}
+                                                <div style={{ flex: 1 }}>
+                                                    <div><strong>{vehicle.name}</strong></div>
+                                                    <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
+                                                        Toll: ${vehicle.toll.toFixed(2)}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </CS2VanillaUIResolver.instance.DropdownItem>
-                                ))}
-                            </CS2VanillaUIResolver.instance.DropdownToggle>
-                        </CS2VanillaUIResolver.instance.Dropdown>
-                    }
-                    tooltip={DescriptionTooltip("Tollbooth Quality", "Higher quality tollbooths process vehicles faster and generate more revenue")}
-                    uppercase={true}
-                    disableFocus={true}
-                    subRow={false}
-                    className={InfoRowTheme.infoRow}
-                />
-
-                <InfoRow
-                    left={"Vehicle Type Rates"}
-                    right={
-                        <CS2VanillaUIResolver.instance.Dropdown
-                            selectedValue={selectedVehicleType}
-                            onSelectionChange={handleVehicleTypeChange}
-                            focusKey="vehicle-type-dropdown"
+                                        </CS2VanillaUIResolver.instance.DropdownItem>
+                                    ))}
+                                </>
+                            }
                         >
-                            <CS2VanillaUIResolver.instance.DropdownToggle focusKey="vehicle-type-toggle">
+                            <CS2VanillaUIResolver.instance.DropdownToggle
+                                showHint={true}
+                                tooltipLabel="Select vehicle type to configure toll rates"
+                                className={CS2VanillaUIResolver.instance.DropdownTheme.dropdownToggle}
+                            >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     {vehicleTypes.find(v => v.id === selectedVehicleType)?.icon && (
                                         <img
@@ -307,33 +340,6 @@ export const TollboothMainPanelComponent = () => {
                                         ${selectedTollRate.toFixed(2)}
                                     </span>
                                 </div>
-                            
-                            
-                                {vehicleTypes.map(vehicle => (
-                                    <CS2VanillaUIResolver.instance.DropdownItem
-                                        key={vehicle.id}
-                                        value={vehicle.id}
-                                        selected={vehicle.id === selectedVehicleType}
-                                        
-                                    >
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%' }}>
-                                            {vehicle.icon && (
-                                                <img
-                                                    src={vehicle.icon}
-                                                    style={{ width: '32px', height: '32px' }}
-                                                    alt=""
-                                                />
-                                            )}
-                                            <div style={{ flex: 1 }}>
-                                                <div><strong>{vehicle.name}</strong></div>
-                                                <div style={{ fontSize: '0.9em', opacity: 0.8 }}>
-                                                    Toll: ${vehicle.toll.toFixed(2)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CS2VanillaUIResolver.instance.DropdownItem>
-                                ))}
-                            
                             </CS2VanillaUIResolver.instance.DropdownToggle>
                         </CS2VanillaUIResolver.instance.Dropdown>
                     }
@@ -341,10 +347,207 @@ export const TollboothMainPanelComponent = () => {
                     uppercase={true}
                     disableFocus={true}
                     subRow={false}
-                    className={InfoRowTheme.infoRow}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
                 />
             </InfoSection>
 
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left="Population"
+                    right="10,523"
+                    uppercase={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* InfoRow with icon */}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    icon="Media/Game/Icons/Population.svg"
+                    left="Population"
+                    right="10,523"
+                    tooltip="Current city population"
+                    uppercase={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* InfoRow with link */}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left="City Policies"
+                    link={<button>Configure</button>}
+                    tooltip="Click to manage city policies"
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Sub-row InfoRow */}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left="Water Supply"
+                    right="85%"
+                    subRow={true}
+                    noShrinkRight={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Disabled focus InfoRow */}
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left="Status"
+                    right="Active"
+                    disableFocus={true}
+                    className="custom-info-row"
+                />
+
+                {/* TooltipRow for tooltips */}
+                <CS2VanillaUIResolver.instance.TooltipRow
+                    icon="Media/Game/Icons/Money.svg"
+                    left="Monthly Income"
+                    right="$12,450"
+                    uppercase={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.tooltipRow}
+                />
+
+                <CS2VanillaUIResolver.instance.InfoSectionFoldout
+                    header="Performance Metrics"
+                    tooltip={DescriptionTooltip("Performance Data", "View tollbooth performance statistics")}
+                    initialExpanded={true}
+                    focusKey="performance-section"
+                >
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Daily Vehicle Target"}
+                        tooltip={DescriptionTooltip("Daily Vehicle Target", "Progress towards daily vehicle processing target")}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={false}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+                    <CS2VanillaUIResolver.instance.CapacityBar
+                        progress={m_VehiclesPassed}
+                        max={m_DailyTarget}
+                        invertColorCodes={false}
+                        children={<span>{m_VehiclesPassed} / {m_DailyTarget} vehicles</span>}
+                    />
+
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Collection Efficiency"}
+                        right={`${m_CollectionEfficiency}%`}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={true}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Traffic Load"}
+                        right={`${m_TrafficLoad}%`}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={true}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+                </CS2VanillaUIResolver.instance.InfoSectionFoldout>
+
+                {/* Quality & Settings - Collapsible */}
+                <CS2VanillaUIResolver.instance.InfoSectionFoldout
+                    header="Quality & Settings"
+                    tooltip={DescriptionTooltip("Tollbooth Settings", "Configure tollbooth quality and operational settings")}
+                    initialExpanded={false}
+                    focusKey="settings-section"
+                    expandFromContent={true}
+                >
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Tollbooth Quality"}
+                        right={getCurrentQualityName()}
+                        tooltip={DescriptionTooltip("Quality Level", "Higher quality tollbooths process vehicles faster")}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={false}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Time-based Pricing"}
+                        right={getCurrentTimeOfDayName()}
+                        tooltip={DescriptionTooltip("Pricing Schedule", "Current time-based pricing configuration")}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={true}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Payment Method"}
+                        right={getCurrentPaymentMethodName()}
+                        tooltip={DescriptionTooltip("Payment Options", "Accepted payment methods at this tollbooth")}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={true}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+
+                    <CS2VanillaUIResolver.instance.InfoRow
+                        left={"Maintenance Level"}
+                        right={`${m_MaintenanceLevel}%`}
+                        uppercase={true}
+                        disableFocus={true}
+                        subRow={true}
+                        className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                    />
+                </CS2VanillaUIResolver.instance.InfoSectionFoldout>
+
+                {/* Management Actions - Collapsible */}
+                <CS2VanillaUIResolver.instance.InfoSectionFoldout
+                    header="Management Actions"
+                    tooltip={DescriptionTooltip("Quick Actions", "Perform common tollbooth management tasks")}
+                    initialExpanded={false}
+                    focusKey="actions-section"
+                    disableFocus={false}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px' }}>
+                        <Button
+                            variant="primary"
+                            onClick={() => {
+                                console.log("Collect all tolls");
+                                trigger(mod.id, "collectAllTolls");
+                            }}
+                            className={roundButtonHighlightStyle.button}
+                        >
+                            💰 Collect All Tolls
+                        </Button>
+
+                        <Button
+                            variant="round"
+                            onClick={() => {
+                                console.log("Perform maintenance");
+                                trigger(mod.id, "performMaintenance");
+                            }}
+                            className={roundButtonHighlightStyle.button}
+                        >
+                            🔧 Perform Maintenance
+                        </Button>
+
+                        <Button
+                            variant="default"
+                            onClick={() => {
+                                console.log("Reset statistics");
+                                trigger(mod.id, "resetStatistics");
+                            }}
+                            className={roundButtonHighlightStyle.button}
+                        >
+                            📊 Reset Statistics
+                        </Button>
+
+                        <Button
+                            variant="default"
+                            onClick={() => {
+                                console.log("Upgrade tollbooth");
+                                trigger(mod.id, "upgradeTollbooth");
+                            }}
+                            className={roundButtonHighlightStyle.button}
+                        >
+                            ⬆️ Upgrade Booth
+                        </Button>
+                    </div>
+                </CS2VanillaUIResolver.instance.InfoSectionFoldout>
+            </InfoSection>
+
+            
         </>
     );
 }

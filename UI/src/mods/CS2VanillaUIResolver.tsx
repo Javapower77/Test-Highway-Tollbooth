@@ -205,39 +205,96 @@ type CapacityBarProps = {
 };
 
 type DropdownProps = {
-    children: ReactNode;
-    className?: string;
-    defaultOpen?: boolean;
-    selectedValue?: any;
-    onSelectionChange?: (value: any) => void;
     focusKey?: string;
+    initialFocused?: string;
+    theme?: any;
+    content?: ReactNode;
+    alignment?: string;
+    children: ReactNode;
+    onToggle?: (visible: boolean) => void;
+    className?: string;
 };
 
 type DropdownToggleProps = {
     theme?: any;
-    openIconComponent?: ReactNode;
-    closeIconComponent?: ReactNode;
     buttonTheme?: any;
     sounds?: any;
     showHint?: boolean;
     selectSound?: string;
-    tooltipLabel?: string;
     className?: string;
     children: ReactNode;
+    tooltipLabel?: string;
     [key: string]: any;
+    openIconComponent?: ReactNode;
+    closeIconComponent?: ReactNode;
 };
 
-type DropdownItemProps<T = any> = {
-    children: ReactNode;
-    className?: string;
-    value?: T;
-    selected?: boolean;
-    onClick?: (value: T) => void;
+type DropdownItemProps = {
     focusKey?: string;
+    value?: any;
+    selected?: boolean;
+    theme?: any;
+    sounds?: any;
+    className?: string;
+    onChange?: (value: any) => void;
+    onToggleSelected?: (value: any) => void;
+    closeOnSelect?: boolean;
+    children: ReactNode;
+}
+
+type InfoRowProps = {
+    icon?: string;
+    left?: ReactNode;
+    right?: ReactNode;
+    tooltip?: ReactNode;
+    link?: ReactNode;
+    uppercase?: boolean;
+    subRow?: boolean;
+    disableFocus?: boolean;
+    className?: string;
+    noShrinkRight?: boolean;
+}
+
+type TooltipRowProps = {
+    icon?: string;
+    left?: ReactNode;
+    right?: ReactNode;
+    uppercase?: boolean;
+    subRow?: boolean;
+    className?: string;
+};
+
+type InfoSectionFoldoutProps = {
+    header: ReactNode;
+    initialExpanded?: boolean;
+    expandFromContent?: boolean;
+    focusKey?: string;
+    tooltip?: ReactNode;
+    disableFocus?: boolean;
+    className?: string;
+    onToggleExpanded?: (expanded: boolean) => void;
+    children: ReactNode;
 };
 
 // COMPREHENSIVE REGISTRY INDEX
 const registryIndex = {
+
+    // VANILLA UI COMPONENTS DEOBSFUSCATED
+    //de-ofuscated 
+    CapacityBar: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.tsx", "CapacityBar"],
+    CapacityBarTheme: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.module.scss", "classes"],
+    //de-ofuscated
+    Dropdown: ["game-ui/common/input/dropdown/dropdown.tsx", "Dropdown"],
+    DropdownToggle: ["game-ui/common/input/dropdown/dropdown-toggle.tsx", "DropdownToggle"],
+    DropdownItem: ["game-ui/common/input/dropdown/items/dropdown-item.tsx", "DropdownItem"],
+    DropdownTheme: ["game-ui/common/input/dropdown/themes/default.module.scss", "classes"],
+    //de-ofuscated
+    InfoRow: ["game-ui/game/components/selected-info-panel/shared-components/info-row/info-row.tsx", "InfoRow"],
+    TooltipRow: ["game-ui/game/components/selected-info-panel/shared-components/info-row/info-row.tsx", "TooltipRow"],
+    InfoRowTheme: ["game-ui/game/components/selected-info-panel/shared-components/info-row/info-row.module.scss", "classes"],
+    //de-ofuscated
+    InfoSectionFoldout: ["game-ui/game/components/selected-info-panel/shared-components/info-section/info-section-foldout.tsx", "InfoSectionFoldout"],
+
     // Layout Components
     Row: ["game-ui/ui/layout.tsx", "Row"],
     Col: ["game-ui/ui/layout.tsx", "Col"],
@@ -275,15 +332,7 @@ const registryIndex = {
     Checkbox: ["game-ui/common/input/toggle/checkbox.tsx", "Checkbox"],
     Toggle: ["game-ui/common/input/toggle/toggle.tsx", "Toggle"],
     
-    //de-ofuscated 
-    CapacityBar: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.tsx", "CapacityBar"],
-    CapacityBarTheme: ["game-ui/game/components/selected-info-panel/shared-components/capacity-bar/capacity-bar.module.scss", "classes"],
-    //de-ofuscated
-    Dropdown: ["game-ui/common/input/dropdown/dropdown.tsx", "Dropdown"],
-    DropdownToggle: ["game-ui/common/input/dropdown/dropdown-toggle.tsx", "DropdownToggle"],
-    DropdownItem: ["game-ui/common/input/dropdown/items/dropdown-item.tsx", "DropdownItem"],
-    DropdownTheme: ["game-ui/common/input/dropdown/themes/default.module.scss", "classes"],
-
+    
     // Navigation Components
     TabContainer: ["game-ui/common/navigation/tab-container/tab-container.tsx", "TabContainer"],
     Tab: ["game-ui/common/navigation/tab/tab.tsx", "Tab"],
@@ -425,13 +474,21 @@ export class CS2VanillaUIResolver {
     public get Checkbox(): (props: PropsCheckbox) => JSX.Element { return this.cachedData["Checkbox"] ?? this.updateCache("Checkbox"); }
     public get Toggle(): (props: PropsToggle) => JSX.Element { return this.cachedData["Toggle"] ?? this.updateCache("Toggle"); }
 
-    
+
+
+
+    // DE-OBFUSCATED COMPONENTS
     public get CapacityBar(): (props: CapacityBarProps) => JSX.Element { return this.cachedData["CapacityBar"] ?? this.updateCache("CapacityBar"); }
     public get CapacityBarTheme(): Theme | any { return this.cachedData["CapacityBarTheme"] ?? this.updateCache("CapacityBarTheme"); }
     public get Dropdown(): (props: DropdownProps) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown"); }
     public get DropdownToggle(): (props: DropdownToggleProps) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle"); }
-    public get DropdownItem(): <T = any>(props: DropdownItemProps<T>) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem"); }    
+    public get DropdownItem(): (props: DropdownItemProps) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem"); }  
     public get DropdownTheme(): Theme | any { return this.cachedData["DropdownTheme"] ?? this.updateCache("DropdownTheme"); }   
+    public get InfoRow(): (props: InfoRowProps) => JSX.Element { return this.cachedData["InfoRow"] ?? this.updateCache("InfoRow"); }
+    public get TooltipRow(): (props: TooltipRowProps) => JSX.Element { return this.cachedData["TooltipRow"] ?? this.updateCache("TooltipRow"); }
+    public get InfoRowTheme(): Theme | any { return this.cachedData["InfoRowTheme"] ?? this.updateCache("InfoRowTheme"); }
+    public get InfoSectionFoldout(): (props: InfoSectionFoldoutProps) => JSX.Element { return this.cachedData["InfoSectionFoldout"] ?? this.updateCache("InfoSectionFoldout"); }
+
 
     // NAVIGATION COMPONENTS
     public get TabContainer(): (props: PropsTabContainer) => JSX.Element { return this.cachedData["TabContainer"] ?? this.updateCache("TabContainer"); }
