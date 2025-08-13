@@ -294,6 +294,19 @@ type InfoButtonProps = {
     className?: string;
 }
 
+type InfoLinkProps = {
+    icon?: string;
+    tooltip?: React.ReactNode;
+    uppercase?: boolean;
+    onSelect?: () => void;
+    children: React.ReactNode;
+    className?: string;
+}
+
+type InfoWrapBoxProps = {
+    className?: string
+    children: ReactNode;
+};
 
 // COMPREHENSIVE REGISTRY INDEX
 const registryIndex = {
@@ -324,7 +337,10 @@ const registryIndex = {
     DescriptionRow: ["game-ui/game/components/selected-info-panel/shared-components/description-row/description-row.tsx", "DescriptionRow"],
     //de-ofuscated
     InfoButton: ["game-ui/game/components/selected-info-panel/shared-components/info-button/info-button.tsx", "InfoButton"],
-
+    //de-ofuscated
+    InfoButtonLink: ["game-ui/game/components/selected-info-panel/shared-components/info-link/info-link.tsx", "InfoLink"],
+    //de-ofuscated
+    InfoWrapBox: ["game-ui/game/components/selected-info-panel/shared-components/info-section/info-wrap-box.tsx", "InfoWrapBox"],
 };
 
 export class CS2VanillaUIResolver {
@@ -364,5 +380,7 @@ export class CS2VanillaUIResolver {
     public get TrafficFlowChart(): (props: TrafficChartProps) => JSX.Element { return this.cachedData["TrafficFlowChart"] ?? this.updateCache("TrafficFlowChart"); }
     public get DescriptionRow(): (props: DescriptionRowProps) => JSX.Element { return this.cachedData["DescriptionRow"] ?? this.updateCache("DescriptionRow"); }
     public get InfoButton(): (props: InfoButtonProps) => JSX.Element { return this.cachedData["InfoButton"] ?? this.updateCache("InfoButton"); }
+    public get InfoButtonLink(): (props: InfoLinkProps) => JSX.Element { return this.cachedData["InfoButtonLink"] ?? this.updateCache("InfoButtonLink"); }  
+    public get InfoWrapBox(): (props: InfoWrapBoxProps) => JSX.Element { return this.cachedData["InfoWrapBox"] ?? this.updateCache("InfoWrapBox"); }    
 
 }

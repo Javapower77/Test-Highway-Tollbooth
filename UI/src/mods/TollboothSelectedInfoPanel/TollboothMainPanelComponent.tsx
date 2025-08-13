@@ -20,10 +20,20 @@ import {
 import { TextInput } from "../../../game-ui-modules/text-input";
 
 import {
+    Notification,
+    HappinessNotification,
+    ProfitabilityNotification,
+    ConditionNotification,
+    AverageHappinessNotification,
+    NotificationBadge
+} from '../../../game-ui-modules/NotificationComponents';
+
+import {
     TrafficVolumeChart,
     TrafficFlowChart,
     TrafficChartTheme
 } from "../../../game-ui-modules/TrafficChartComponents";
+import { InfoLink } from '../../../game-ui-modules/InfoLinkComponent';
 
 import { Unit } from "cs2/l10n";
 //import styles from "mods/TollboothSelectedInfoPanel/TollboothMainPanelComponent.module.scss";
@@ -251,6 +261,13 @@ export const TollboothMainPanelComponent = () => {
 
     const trafficVolumeData = [0, 5, 10, 23, 41];
     const trafficFlowData = [1, 22, 24, 54, 66];
+
+    // Usage examples:
+    const notificationData = {
+        key: "tollbooth_efficiency_low",
+        iconPath: "Media/Game/Icons/Warning.svg",
+        count: 3
+    };
 
     // Function to render content based on selected tab
     const renderTabContent = () => {
@@ -563,6 +580,58 @@ export const TollboothMainPanelComponent = () => {
                     </div>
                 </CS2VanillaUIResolver.instance.DescriptionRow>
             </InfoSection>
+
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoWrapBox>
+                    This is an example of InfoWrapBox. You can put any content you want in here and it will wrap nicely within the panel.
+                </CS2VanillaUIResolver.instance.InfoWrapBox>
+            </InfoSection>
+
+            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                <CS2VanillaUIResolver.instance.InfoRow
+                    left={"NOTIFICATIONS TESTS"}
+                    tooltip={DescriptionTooltip("Panel Navigation", "Switch between different sections of the tollbooth information")}
+                    uppercase={true}
+                    disableFocus={true}
+                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                />
+
+                {/* Basic notification */}
+                <Notification notification={notificationData} />
+
+                {/* Notification with count badge */}
+                <Notification
+                    notification={{
+                        key: "multiple_issues",
+                        iconPath: "Media/Game/Icons/Alert.svg",
+                        count: 5
+                    }}
+                />
+
+                {/* Gender-specific happiness notification */}
+                <HappinessNotification
+                    notification={notificationData}
+                    tooltipTags={["Male"]}
+                />
+
+                {/* Profitability notification */}
+                <ProfitabilityNotification
+                    notification={{
+                        key: "low_profit",
+                        iconPath: "Media/Game/Icons/Money.svg"
+                    }}
+                />
+
+                {/* Condition notification */}
+                <ConditionNotification
+                    notification={{
+                        key: "health_issue",
+                        iconPath: "Media/Game/Icons/Health.svg"
+                    }}
+                    tooltipTags={["Female"]}
+                />
+            </InfoSection>
+
 
             {/* INFO BUTTON NAVIGATION SECTION */}
             <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
