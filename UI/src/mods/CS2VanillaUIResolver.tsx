@@ -308,6 +308,63 @@ type InfoWrapBoxProps = {
     children: ReactNode;
 };
 
+// NOTIFICATION CONTROLS PROPS INTERFACES
+type NotificationData = {
+    key: string;
+    iconPath: string;
+    count?: number;
+    priority?: 'low' | 'medium' | 'high' | 'critical';
+    timestamp?: Date;
+    persistent?: boolean;
+}
+
+type NotificationProps = {
+    notification: NotificationData;
+    anchorElRef?: React.RefObject<HTMLElement>;
+    tooltipTags?: string[];
+    theme?: any;
+    onClick?: () => void;
+    onDismiss?: () => void;
+    'data-testid'?: string;
+    className?: string;
+};
+
+type HappinessNotificationProps = {
+    notification: NotificationData;
+    anchorElRef?: React.RefObject<HTMLElement>;
+    tooltipTags?: string[];
+    theme?: any;
+    className?: string;
+};
+
+type AverageHappinessNotificationProps = {
+    notification: NotificationData;
+    theme?: any;
+    className?: string;
+};
+
+type ProfitabilityNotificationProps = {
+    notification: NotificationData;
+    theme?: any;
+    className?: string;
+};
+
+type ConditionNotificationProps = {
+    notification: NotificationData;
+    anchorElRef?: React.RefObject<HTMLElement>;
+    tooltipTags?: string[];
+    theme?: any;
+    className?: string;
+};
+
+type NotificationBadgeProps = {
+    className?: string;
+    children: ReactNode;
+    theme?: any;
+};
+
+
+
 // COMPREHENSIVE REGISTRY INDEX
 const registryIndex = {
 
@@ -341,6 +398,14 @@ const registryIndex = {
     InfoButtonLink: ["game-ui/game/components/selected-info-panel/shared-components/info-link/info-link.tsx", "InfoLink"],
     //de-ofuscated
     InfoWrapBox: ["game-ui/game/components/selected-info-panel/shared-components/info-section/info-wrap-box.tsx", "InfoWrapBox"],
+    //de-ofuscated
+    Notification: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "Notification"],
+    HappinessNotification: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "HappinessNotification"],
+    AverageHappinessNotification: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "AverageHappinessNotification"],
+    ProfitabilityNotification: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "ProfitabilityNotification"],
+    ConditionNotification: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "ConditionNotification"],
+    NotificationBadge: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.tsx", "NotificationBadge"],
+    NotificationTheme: ["game-ui/game/components/selected-info-panel/shared-components/notification/notification.module.scss", "classes"],
 };
 
 export class CS2VanillaUIResolver {
@@ -382,5 +447,11 @@ export class CS2VanillaUIResolver {
     public get InfoButton(): (props: InfoButtonProps) => JSX.Element { return this.cachedData["InfoButton"] ?? this.updateCache("InfoButton"); }
     public get InfoButtonLink(): (props: InfoLinkProps) => JSX.Element { return this.cachedData["InfoButtonLink"] ?? this.updateCache("InfoButtonLink"); }  
     public get InfoWrapBox(): (props: InfoWrapBoxProps) => JSX.Element { return this.cachedData["InfoWrapBox"] ?? this.updateCache("InfoWrapBox"); }    
-
+    public get Notification(): (props: NotificationProps) => JSX.Element { return this.cachedData["Notification"] ?? this.updateCache("Notification"); }
+    public get HappinessNotification(): (props: HappinessNotificationProps) => JSX.Element { return this.cachedData["HappinessNotification"] ?? this.updateCache("HappinessNotification"); }
+    public get AverageHappinessNotification(): (props: AverageHappinessNotificationProps) => JSX.Element { return this.cachedData["AverageHappinessNotification"] ?? this.updateCache("AverageHappinessNotification"); }
+    public get ProfitabilityNotification(): (props: ProfitabilityNotificationProps) => JSX.Element { return this.cachedData["ProfitabilityNotification"] ?? this.updateCache("ProfitabilityNotification"); }
+    public get ConditionNotification(): (props: ConditionNotificationProps) => JSX.Element { return this.cachedData["ConditionNotification"] ?? this.updateCache("ConditionNotification"); }
+    public get NotificationBadge(): (props: NotificationBadgeProps) => JSX.Element { return this.cachedData["NotificationBadge"] ?? this.updateCache("NotificationBadge"); }
+    public get NotificationTheme(): Theme | any { return this.cachedData["NotificationTheme"] ?? this.updateCache("NotificationTheme"); }
 }

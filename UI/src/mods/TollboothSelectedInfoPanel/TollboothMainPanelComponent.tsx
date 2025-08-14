@@ -22,11 +22,13 @@ import { TextInput } from "../../../game-ui-modules/text-input";
 import {
     Notification,
     HappinessNotification,
+    AverageHappinessNotification,
     ProfitabilityNotification,
     ConditionNotification,
-    AverageHappinessNotification,
-    NotificationBadge
-} from '../../../game-ui-modules/NotificationComponents';
+    NotificationBadge,
+    EnhancedNotification,
+    NotificationContainer
+} from '../../../game-ui-modules/NotificationControl';
 
 import {
     TrafficVolumeChart,
@@ -262,11 +264,34 @@ export const TollboothMainPanelComponent = () => {
     const trafficVolumeData = [0, 5, 10, 23, 41];
     const trafficFlowData = [1, 22, 24, 54, 66];
 
-    // Usage examples:
-    const notificationData = {
-        key: "tollbooth_efficiency_low",
-        iconPath: "Media/Game/Icons/Warning.svg",
-        count: 3
+    // Sample notification data for demonstrations
+    const sampleNotifications = {
+        tollboothAlert: {
+            key: "tollbooth_maintenance_required",
+            iconPath: "Media/Misc/Warning.svg",
+            count: 3
+        },
+        citizenHappiness: {
+            key: "citizen_happy_with_toll_rates",
+            iconPath: "Media/Game/Icons/Happy.svg"
+        },
+        averageHappiness: {
+            key: "district_happiness_average",
+            iconPath: "Media/Game/Icons/Happy.svg"
+        },
+        profitability: {
+            key: "tollbooth_profitability_high",
+            iconPath: MoneySrc
+        },
+        citizenCondition: {
+            key: "citizen_traffic_stress",
+            iconPath: "Media/Game/Icons/Healthcare.svg"
+        },
+        trafficJam: {
+            key: "traffic_congestion_warning",
+            iconPath: "Media/Game/Icons/Traffic.svg",
+            count: 12
+        }
     };
 
     // Function to render content based on selected tab
@@ -525,6 +550,44 @@ export const TollboothMainPanelComponent = () => {
                     </>
                 );
 
+            case 'notifications':
+                return (
+                    <>
+                        {/* Real-time Tollbooth Notifications */}
+                        <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
+                            <CS2VanillaUIResolver.instance.InfoRow
+                                left={"Tollbooth Alerts"}
+                                tooltip={DescriptionTooltip("Notifications", "Real-time alerts and status updates for your tollbooth")}
+                                uppercase={true}
+                                disableFocus={true}
+                                className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
+                            />
+
+                            {/* Use the NotificationsSection component */}
+                            <CS2VanillaUIResolver.instance.NotificationsSection
+                                focusKey="tollbooth-notifications"
+                                notifications={[
+                                    {
+                                        key: "tollbooth_maintenance_required",
+                                        iconPath: "Media/Game/Icons/MaintenanceVehicle.svg",
+                                        count: sampleNotifications.tollboothAlert.count
+                                    },
+                                    {
+                                        key: "traffic_congestion_warning",
+                                        iconPath: "Media/Game/Icons/Traffic.svg",
+                                        count: sampleNotifications.trafficJam.count
+                                    },
+                                    {
+                                        key: "revenue_target_achieved",
+                                        iconPath: sampleNotifications.profitability.iconPath,
+                                        count: 1
+                                    }
+                                ]}
+                            />
+                        </InfoSection>
+                    </>
+                );
+
             default:
             case 'overview':
                 return (
@@ -572,6 +635,8 @@ export const TollboothMainPanelComponent = () => {
 
     return (
         <>
+            
+
             {/* Description Section */}
             <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
                 <CS2VanillaUIResolver.instance.DescriptionRow>
@@ -587,50 +652,8 @@ export const TollboothMainPanelComponent = () => {
                 </CS2VanillaUIResolver.instance.InfoWrapBox>
             </InfoSection>
 
-            <InfoSection focusKey={CS2VanillaUIResolver.instance.FOCUS_DISABLED} disableFocus={true}>
-                <CS2VanillaUIResolver.instance.InfoRow
-                    left={"NOTIFICATIONS TESTS"}
-                    tooltip={DescriptionTooltip("Panel Navigation", "Switch between different sections of the tollbooth information")}
-                    uppercase={true}
-                    disableFocus={true}
-                    className={CS2VanillaUIResolver.instance.InfoRowTheme.infoRow}
-                />
-
-                {/* Basic notification */}
-                <Notification notification={notificationData} />
-
-                {/* Notification with count badge */}
-                <Notification
-                    notification={{
-                        key: "multiple_issues",
-                        iconPath: "Media/Game/Icons/Alert.svg",
-                        count: 5
-                    }}
-                />
-
-                {/* Gender-specific happiness notification */}
-                <HappinessNotification
-                    notification={notificationData}
-                    tooltipTags={["Male"]}
-                />
-
-                {/* Profitability notification */}
-                <ProfitabilityNotification
-                    notification={{
-                        key: "low_profit",
-                        iconPath: "Media/Game/Icons/Money.svg"
-                    }}
-                />
-
-                {/* Condition notification */}
-                <ConditionNotification
-                    notification={{
-                        key: "health_issue",
-                        iconPath: "Media/Game/Icons/Health.svg"
-                    }}
-                    tooltipTags={["Female"]}
-                />
-            </InfoSection>
+            
+   
 
 
             {/* INFO BUTTON NAVIGATION SECTION */}
@@ -701,6 +724,17 @@ export const TollboothMainPanelComponent = () => {
                             setSelectedTab('actions');
                         }}
                     />
+
+                    {/* Add this new notifications button
+                    <CS2VanillaUIResolver.instance.InfoButton
+                        label="Notifications"
+                        icon="Media/Game/Icons/Notifications.svg"
+                        selected={selectedTab === 'notifications'}
+                        onSelect={() => {
+                            console.log("Notifications tab selected");
+                            setSelectedTab('notifications');
+                        }}
+                    /> */}
                 </div>
             </InfoSection>
 
